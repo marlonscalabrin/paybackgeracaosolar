@@ -28,6 +28,9 @@ Payback = function() {
 	
 	this.periodoAnalise = 25 + 1; //anos
 	
+	this.reembolso = [];
+	this.capex = [];
+	this.opex = [];
 	this.fluxoCaixaAcumulado = [];
 	
 	this.energia = function() { //kWh/ano
@@ -35,13 +38,26 @@ Payback = function() {
 	}
 	
 	this.inicializarCampos = function() {
-		document.getElementById("irradiacao").value = this.irradiacao;
-		document.getElementById("tarifa").value = this.tarifa;
-		document.getElementById("potencia").value = this.potencia;
-		document.getElementById("investimentoInicial").value = this.investimentoInicial;
+		document.getElementById("irradiacao").value = this.irradiacao.toString().replace(".", ",");
+		document.getElementById("tarifa").value = this.tarifa.toString().replace(".", ",");
+		document.getElementById("potencia").value = this.potencia.toString().replace(".", ",");
+		document.getElementById("investimentoInicial").value = this.investimentoInicial.toString().replace(".", ",");
+		
+		document.getElementById("irradiacao").onkeyup = this.corrigeVirgula;
+		document.getElementById("tarifa").onkeyup = this.corrigeVirgula;
+		document.getElementById("potencia").onkeyup = this.corrigeVirgula;
+		document.getElementById("investimentoInicial").onkeyup = this.corrigeVirgula;
+		document.getElementById("irradiacao").onchange = this.corrigeVirgula;
+		document.getElementById("tarifa").onchange = this.corrigeVirgula;
+		document.getElementById("potencia").onchange = this.corrigeVirgula;
+		document.getElementById("investimentoInicial").onchange = this.corrigeVirgula;
 		
 		this.carregarCidades();
 		
+	}
+	
+	this.corrigeVirgula = function(event) {
+		event.target.value = event.target.value.toString().replace(".", ",");
 	}
 	
 	this.carregarCidades = function() {
@@ -64,31 +80,104 @@ Payback = function() {
 	
 	this.carregarIrradiacaoCidade = function() {
 		var select = document.getElementById("cidade");
-		document.getElementById("irradiacao").value = payback.irradiacaoConhecida[select.value] || 5;
+		document.getElementById("irradiacao").value = (payback.irradiacaoConhecida[select.value] || 5).toString().replace(".", ",");
 	}
 	
 	this.calcular = function() {
-		this.irradiacao = parseFloat(document.getElementById("irradiacao").value);
-		this.tarifa = parseFloat(document.getElementById("tarifa").value);
-		this.potencia = parseFloat(document.getElementById("potencia").value);
-		this.investimentoInicial = parseFloat(document.getElementById("investimentoInicial").value);
+		this.irradiacao = parseFloat(document.getElementById("irradiacao").value.replace(",", "."));
+		this.tarifa = parseFloat(document.getElementById("tarifa").value.replace(",", "."));
+		this.potencia = parseFloat(document.getElementById("potencia").value.replace(",", "."));
+		this.investimentoInicial = parseFloat(document.getElementById("investimentoInicial").value.replace(",", "."));
 		this.montarTabela();
 		var payback = this.calcularPayback();
-		document.getElementById("payback").innerHTML = "Payback " + payback;
+		document.getElementById("payback").innerHTML = "Payback<br/>" + payback;
 		var corpo = document.getElementById("tabela").style.display = "";
 		var economiaMes = this.economiaMes();
-		document.getElementById("economiaMes").innerHTML = "Economia primeiro mês R$ " + economiaMes.toFixed(2);
+		document.getElementById("economiaMes").innerHTML = "Economia primeiro mês<br/>R$ " + economiaMes.toFixed(2);
 		var economiaAno = this.economiaAno();
-		document.getElementById("economiaAno").innerHTML = "Economia primeiro ano R$ " + economiaAno.toFixed(2);
+		document.getElementById("economiaAno").innerHTML = "Economia primeiro ano<br/>R$ " + economiaAno.toFixed(2);
+		
+		var periodos = [];
+		var acumulado = [];
+		var paybackEvent = [];
+		var investimento = [];
+		var reembolso = [];
+		var ano = new Date().getFullYear();
+		var encontrouPayback = false;
+		for (var i = 0; i < this.periodoAnalise; i++) {
+			periodos.push(ano + i);
+			acumulado.push(parseFloat((this.fluxoCaixaAcumulado[i]||0).toFixed(2)));
+			investimento[i] = -this.capex[i] -this.opex[i];
+			reembolso[i] = this.reembolso[i];
+			if (i > 0) {
+				investimento[i] += investimento[i - 1];
+				reembolso[i] += reembolso[i - 1];
+			}
+			if (!encontrouPayback && this.fluxoCaixaAcumulado[i] > 0) {
+				paybackEvent[i] = investimento[i];
+				encontrouPayback = true;
+			}
+		}
+		new Chart(
+			document.getElementById("chart"),
+			{
+				"type":"line",
+				"data":{
+					"labels":periodos,
+					"datasets":[
+						{
+							"label":"FC Acumulado",
+							"data":acumulado,
+							"fill":false,
+							"borderColor":"rgb(75, 192, 192)",
+							"lineTension":0.1
+						},
+						{
+							"label":"Payback",
+							"data":paybackEvent,
+							"fill":false,
+							"borderColor":"rgb(75, 75, 75)",
+							"lineTension":0.1,
+							"pointRadius": 10
+						},
+						{
+							"label":"Investimento",
+							"data":investimento,
+							"fill":false,
+							"borderColor":"rgb(255, 75, 75)",
+							"lineTension":0.1,
+							"pointRadius": 1
+						},
+						{
+							"label":"Reembolso",
+							"data":reembolso,
+							"fill":false,
+							"borderColor":"rgb(75, 255, 75)",
+							"lineTension":0.1,
+							"pointRadius": 1
+						}
+					]},
+				"options":{
+					responsive: true,
+					scales: {
+						yAxes: [{
+							ticks: {
+								min: acumulado[0]
+							}
+						}]
+					}
+				}
+			}
+		);
 	}
 
 	this.montarTabela = function() {
 		var geracao = this.calcularGeracao();
 		var tarifas = this.calcularTarifas();
-		var reembolso = this.calcularReembolso(geracao, tarifas);
-		var capex = this.listarCapex();
-		var opex = this.calcularOpex();
-		var fluxoCaixaAnual = this.gerarFluxoDeCaixa(reembolso, capex, opex);
+		this.reembolso = this.calcularReembolso(geracao, tarifas);
+		this.capex = this.listarCapex();
+		this.opex = this.calcularOpex();
+		var fluxoCaixaAnual = this.gerarFluxoDeCaixa(this.reembolso, this.capex, this.opex);
 		this.fluxoCaixaAcumulado = [];
 		this.fluxoCaixaAcumulado = this.gerarFluxoDeCaixaAcumulado(fluxoCaixaAnual);
 		var corpo = document.getElementById("corpoTabela");
@@ -105,13 +194,13 @@ Payback = function() {
 			td.innerHTML = tarifas[i].toFixed(2);
 			tr.appendChild(td);
 			td = document.createElement("td");
-			td.innerHTML = reembolso[i].toFixed(2);
+			td.innerHTML = this.reembolso[i].toFixed(2);
 			tr.appendChild(td);
 			td = document.createElement("td");
-			td.innerHTML = capex[i].toFixed(2);
+			td.innerHTML = this.capex[i].toFixed(2);
 			tr.appendChild(td);
 			td = document.createElement("td");
-			td.innerHTML = opex[i].toFixed(2);
+			td.innerHTML = this.opex[i].toFixed(2);
 			tr.appendChild(td);
 			td = document.createElement("td");
 			td.innerHTML = fluxoCaixaAnual[i].toFixed(2);

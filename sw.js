@@ -1,4 +1,4 @@
-var CACHE_NAME = 'static-v4';
+var CACHE_NAME = 'static-v5';
 
 self.addEventListener('install', function (event) {
   event.waitUntil(
@@ -16,7 +16,8 @@ self.addEventListener('install', function (event) {
 		'./addtohomescreen.css',
 		'./addtohomescreen.min.js',
 		'./offline.manifest',
-		'./manifest.json'
+		'./manifest.json',
+		'./chart.js'
       ]);
     })
   )

@@ -16,6 +16,7 @@
     <!-- Page styles -->
     <link rel="stylesheet" href="./material.min.css">
     <script src="main.js"></script>
+    <script src="chart.js"></script>
 	
 	<link rel="stylesheet" type="text/css" href="./addtohomescreen.css">
 	<script src="./addtohomescreen.min.js"></script>
@@ -55,28 +56,28 @@
 				<label for="irradiacao">Irradiação (kWh/m².dia)</label>
 			  </div>
 			  <div class="mdl-textfield mdl-js-textfield">
-				<input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="irradiacao">
+				<input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(,[0-9]+)?" id="irradiacao">
 				<span class="mdl-textfield__error">Irradiação deve ser um número!</span>
 			  </div>
 			  <div>
 				<label for="tarifa">Tarifa (R$/kWh)</label>
 			  </div>
 			  <div class="mdl-textfield mdl-js-textfield">
-				<input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="tarifa">
+				<input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(,[0-9]+)?" id="tarifa">
 				<span class="mdl-textfield__error">Tarifa deve ser um número!</span>
 			  </div>
 			  <div>
 				<label for="potencia">Potência (kWp)</label>
 			  </div>
 			  <div class="mdl-textfield mdl-js-textfield">
-				<input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="potencia">
+				<input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(,[0-9]+)?" id="potencia">
 				<span class="mdl-textfield__error">Potência deve ser um número!</span>
 			  </div>
 			  <div>
 				<label for="investimentoInicial">Investimento Inicial (R$)</label>
 			  </div>
 			  <div class="mdl-textfield mdl-js-textfield">
-				<input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="investimentoInicial">
+				<input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(,[0-9]+)?" id="investimentoInicial">
 				<span class="mdl-textfield__error">Valor deve ser um número!</span>
 			  </div>
 			  <h2 id="payback"></h2>
@@ -87,6 +88,8 @@
 			</button>
 			</form>
         </div>
+		
+		<canvas id="chart" class="chartjs"></canvas>
 		
 		<table id="tabela" class="mdl-data-table mdl-js-data-table mdl-shadow--2dp" style="margin:0 auto; display:none">
 		  <thead>
