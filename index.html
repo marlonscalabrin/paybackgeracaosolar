@@ -204,6 +204,11 @@
 	</script>
 	<script>
 		addToHomescreen();
+		window.addEventListener("beforeinstallprompt", ev => { 
+		  ev.preventDefault();
+
+		  setTimeout(ev.prompt, 500);
+		});
 	</script>
   </body>
 </html>
