@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="pt-BR" manifest="offline.manifest">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="Aplicativo Web Instalável para calculo de payback de microgeração de energia solar.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+	<link rel="shortcut icon" type="image/png" href="./icon.png"/>
+	<link rel="shortcut icon" type="image/png" href="./icon.png"/>
+	<link rel="apple-touch-icon" href="./icon.png">
+	<meta name="apple-mobile-web-app-title" content="Flessak - Payback Microgeração Solar">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<link rel="manifest" href='data:text/plain,{"lang":"pt-BR","dir":"ltr","name":"Flessak-PaybackMicrogeraçãoSolar","description":"AplicativoWebInstalávelparacalculodepaybackdemicrogeraçãodeenergiasolar.","short_name":"Payback","icons":[{"src":"./icon.png","sizes":"192x192"}],"scope":"/","start_url":"/index.html","display":"fullscreen","orientation":"portrait","theme_color":"black","background_color":"white","serviceworker":{"src":"main.js","scope":"/","use_cache":true}}'>
+    <title>Flessak - Payback Microgeração Solar</title>
+
+    <!-- Page styles -->
+    <link rel="stylesheet" href="./material.min.css">
+    <script src="main.js"></script>
+	
+	<link rel="stylesheet" type="text/css" href="./addtohomescreen.css">
+	<script src="./addtohomescreen.min.js"></script>
+  </head>
+  <body>
+    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+
+      <div class="android-header mdl-layout__header mdl-layout__header--waterfall">
+        <div class="mdl-layout__header-row">
+          <span class="android-title mdl-layout-title">
+            Payback Microgeração Solar
+          </span>
+          <!-- Add spacer, to align navigation to the right in desktop -->
+          <div class="android-header-spacer mdl-layout-spacer"></div>
+          <!-- Navigation -->
+          <div class="android-navigation-container">
+            <nav class="android-navigation mdl-navigation">
+              <a class="mdl-navigation__link mdl-typography--text-uppercase" href="http://www.flessak.com.br">Flessak</a>
+            </nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="android-content mdl-layout__content">
+        <a name="top"></a>
+        <div class="mdl-typography--text-center">
+			<form action="#">
+			  <div>
+				<label for="cidade">Cidade</label>
+			  </div>
+			  <div class="mdl-textfield mdl-js-textfield">
+				<select class="mdl-textfield__input" id="cidade">
+					<option value="">--Selecione uma cidade--</option>
+				</select>
+			  </div>
+			  <div>
+				<label for="irradiacao">Irradiação (kWh/m².dia)</label>
+			  </div>
+			  <div class="mdl-textfield mdl-js-textfield">
+				<input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="irradiacao">
+				<span class="mdl-textfield__error">Irradiação deve ser um número!</span>
+			  </div>
+			  <div>
+				<label for="tarifa">Tarifa (R$/kWh)</label>
+			  </div>
+			  <div class="mdl-textfield mdl-js-textfield">
+				<input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="tarifa">
+				<span class="mdl-textfield__error">Tarifa deve ser um número!</span>
+			  </div>
+			  <div>
+				<label for="potencia">Potência (kWp)</label>
+			  </div>
+			  <div class="mdl-textfield mdl-js-textfield">
+				<input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="potencia">
+				<span class="mdl-textfield__error">Potência deve ser um número!</span>
+			  </div>
+			  <div>
+				<label for="investimentoInicial">Investimento Inicial (R$)</label>
+			  </div>
+			  <div class="mdl-textfield mdl-js-textfield">
+				<input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="investimentoInicial">
+				<span class="mdl-textfield__error">Valor deve ser um número!</span>
+			  </div>
+			  <h2 id="payback"></h2>
+			  <h4 id="economiaMes"></h4>
+			  <h3 id="economiaAno"></h3>
+			<button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored" onclick="payback.calcular(); return false;">
+				Calcular
+			</button>
+			</form>
+        </div>
+		
+		<table id="tabela" class="mdl-data-table mdl-js-data-table mdl-shadow--2dp" style="margin:0 auto; display:none">
+		  <thead>
+			<tr>
+			  <th>Ano</th>
+			  <th>Geração</th>
+			  <th>Tarifa</th>
+			  <th>Reembolso</th>
+			  <th>CAPEX</th>
+			  <th>OPEX</th>
+			  <th>FC anual</th>
+			  <th>FC Acumulado</th>
+			</tr>
+		  </thead>
+		  <tbody id="corpoTabela">
+		  </tbody>
+		</table>
+
+        <footer class="android-footer mdl-mega-footer">
+          <div class="mdl-mega-footer--top-section">
+            <div class="mdl-mega-footer--right-section">
+              <a class="mdl-typography--font-light" href="#top">
+                Topo
+                <i class="material-icons">^</i>
+              </a>
+            </div>
+            <p class="mdl-typography--font-light">Flessak Eletro Industrial - 2017</p>
+          </div>
+
+        </footer>
+      </div>
+    </div>
+    <script src="./material.min.js"></script>
+    <script>
+		payback.inicializarCampos();
+		(function(){
+		  
+		  var xhr = new XMLHttpRequest()
+		  
+		  xhr.onload = function() {
+			var manifestJson = JSON.parse(xhr.responseText);
+			addTags(manifestJson);
+		  };
+		  
+		  var manifestEl = document.head.querySelector("link[rel=manifest]");
+		  if(!!manifestEl === true) {
+		  
+			xhr.open("GET", manifestEl.href);
+			xhr.send();
+		  }
+		  
+		  var addTags = function(manifest) {
+		  
+			var webAppCapable = document.createElement("meta");
+			var webAppTitle = document.createElement("meta");
+			var webAppStartUrl = document.createElement("meta");
+			webAppCapable.setAttribute("name", "apple-mobile-web-app-capable");
+			var isWebAppCapable = (manifest['display'] == 'standalone' || manifest['display'] == 'fullscreen') ? 'yes' : 'no';
+			webAppCapable.setAttribute("content", isWebAppCapable);
+			webAppTitle.setAttribute("name", "apple-mobile-web-app-title");
+			webAppTitle.setAttribute("content", manifest['short_name'] || manifest['name'] || "");
+			
+			webAppStartUrl.setAttribute("name", "msapplication-starturl");
+			webAppStartUrl.setAttribute("content", manifest['start_url'] || location.href);
+			
+			// Parse the icons.
+			
+			var icons = manifest["icons"] || [];
+			
+			for(var iconIdx = 0; iconIdx < icons.length; iconIdx++) {
+			  var iconElement = document.createElement("link");
+			  var icon = icons[iconIdx];
+			  
+			  iconElement.setAttribute("rel", "apple-touch-icon");
+			  iconElement.setAttribute("href", icon.src);
+			  iconElement.setAttribute("sizes", icon.sizes);
+			  
+			  document.head.appendChild(iconElement);
+			}
+			document.head.appendChild(webAppCapable);
+			document.head.appendChild(webAppTitle);
+			document.head.appendChild(webAppStartUrl);
+		  }
+		})();
+		
+		
+		
+		// This all simulates the start URL.
+		(function() {
+		  var startUrlEl = document.querySelector("meta[name=msapplication-starturl]");
+		  if(!!startUrlEl === true && navigator.standalone === true) {
+			var lastUrl = localStorage["navigate"];
+			history.pushState({launched: (!!lastUrl == false && history.length === 1)}, undefined, lastUrl || startUrlEl.content);
+			localStorage.removeItem("navigate");
+			
+			// Intercept all anchor clicks and keep fullscreen if in origin
+			document.addEventListener("click", function(e) {
+			  var target = e.target;
+			  if(target.tagName === 'A') {
+				
+				var href = target.getAttribute("href");
+				var linkedUrl = new URL(target.href);
+				if(linkedUrl.origin === location.origin) {
+				  e.preventDefault();
+				  location.href = href;
+				}
+				else {
+				  // When we are navigating away store the state so we can resume.
+				  localStorage["navigate"] = location.href;
+				}
+			  }
+			});
+		  }
+		})();
+	</script>
+	<script>
+		addToHomescreen();
+	</script>
+  </body>
+</html>
