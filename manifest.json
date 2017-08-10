@@ -7,7 +7,7 @@
   "theme_color": "#2196f3",
   "background_color": "#ffffff",
   "Scope": "/",
-  "start_url": "/index.html",
+  "start_url": "/",
   "icons": [
     {
       "src": "icon-72x72.png",
