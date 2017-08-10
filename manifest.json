@@ -6,7 +6,6 @@
   "description":"Aplicativo Web Instalável para calculo de payback de microgeração de energia solar.",
   "theme_color": "#2196f3",
   "background_color": "#ffffff",
-  "display": "fullscreen",
   "Scope": "/",
   "start_url": "/index.html",
   "icons": [
@@ -51,5 +50,9 @@
       "type": "image/png"
     }
   ],
-  "splash_pages": null
+  "splash_pages": null,
+  "display": "standalone",
+  "related_applications": [{
+      "platform": "web"
+  }]
 }
