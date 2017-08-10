@@ -53,6 +53,7 @@
   "splash_pages": null,
   "display": "standalone",
   "related_applications": [{
-      "platform": "web"
+      "platform": "web",
+	  "url": "https://marlonscalabrin.github.io/paybackgeracaosolar"
   }]
 }
