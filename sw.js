@@ -1,15 +1,20 @@
-var CACHE_NAME = 'static-v1';
+var CACHE_NAME = 'static-v2';
 
 self.addEventListener('install', function (event) {
   event.waitUntil(
     caches.open(CACHE_NAME).then(function (cache) {
       return cache.addAll([
-        '/',
-        '/index.html',
-        '/styles.css',
-        '/app.js',
-        '/manifest.js',
-        '/vendor.js',
+        './',
+		'./index.html',
+		'./main.css',
+		'./main.js',
+		'./material.min.css',
+		'./material.min.js',
+		'./icon-192x192.png',
+		'./icon-144x144.png',
+		'./favicon.ico',
+		'./addtohomescreen.css',
+		'./addtohomescreen.min.js'
       ]);
     })
   )
