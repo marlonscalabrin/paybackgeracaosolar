@@ -1,11 +1,11 @@
 {
   "lang":"pt-BR",
   "dir":"ltr",
-  "name": "Flessak - Payback Microgeração Solar",
+  "name": "Payback Microgeração Solar",
   "short_name": "Payback",
   "description":"Aplicativo Web Instalável para calculo de payback de microgeração de energia solar.",
   "theme_color": "#2196f3",
-  "background_color": "#ffffff",
+  "background_color": "#cfc9c9",
   "Scope": "/",
   "start_url": "https://marlonscalabrin.github.io/paybackgeracaosolar/",
   "icons": [
